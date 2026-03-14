@@ -5,15 +5,16 @@
 
 #include "freertos/FreeRTOS.h"
 
-void application_controller_init() {
-    xTaskCreate(application_controller_handler,
+void controller::application::init() {
+    xTaskCreate(controller::application::handler,
                 "application_controller_handler", 4096, NULL, 5, NULL);
 }
 
-void application_controller_handler(void *arg) {
+void controller::application::handler(void *arg) {
     for (;;) {
-        led_controller_toggle_status();
-
-        vTaskDelay(pdMS_TO_TICKS(1000));
+        controller::led::set_status(true);
+        vTaskDelay(pdMS_TO_TICKS(500));
+        controller::led::set_status(false);
+        vTaskDelay(pdMS_TO_TICKS(500));
     }
 }
