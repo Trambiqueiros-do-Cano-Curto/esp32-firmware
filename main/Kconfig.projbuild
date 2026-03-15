@@ -12,3 +12,47 @@ menu "Wi-Fi Configuration"
             Senha da rede Wi-Fi.
 
 endmenu
+
+menu "MQTT Configuration"
+    config MQTT_BROKER_URL
+        string "URL do broker MQTT"
+        default ""
+        help
+            Endereço do broker MQTT (ex: mqtt://192.168.1.100).
+
+    config MQTT_USERNAME
+        string "Usuário MQTT"
+        default ""
+        help
+            Nome de usuário para autenticação no broker MQTT.
+
+    config MQTT_PASSWORD
+        string "Senha MQTT"
+        default ""
+        help
+            Senha para autenticação no broker MQTT.
+
+    config MQTT_TOPIC_PREFIX
+        string "Prefixo dos tópicos MQTT"
+        default "esp32"
+        help
+            Prefixo utilizado nos tópicos MQTT publicados pelo dispositivo.
+
+endmenu
+
+menu "ESP-NOW Configuration"
+    config ESPNOW_CHANNEL
+        int "Canal Wi-Fi do ESP-NOW"
+        range 1 13
+        default 1
+        help
+            Canal Wi-Fi utilizado pelo ESP-NOW para comunicação entre dispositivos.
+
+    config ESPNOW_PMK
+        string "Chave primária (PMK) do ESP-NOW"
+        default ""
+        help
+            Chave de criptografia primária (Primary Master Key) do ESP-NOW.
+            Deve ter exatamente 16 caracteres se habilitada.
+
+endmenu
