@@ -1,0 +1,14 @@
+menu "Wi-Fi Configuration"
+    config WIFI_SSID
+        string "SSID do Wi-Fi"
+        default "MinhaRede"
+        help
+            Nome da rede Wi-Fi que o ESP32 deve conectar.
+
+    config WIFI_PASSWORD
+        string "Senha do Wi-Fi"
+        default "senha123"
+        help
+            Senha da rede Wi-Fi.
+
+endmenu
