@@ -6,7 +6,7 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
-#include <cstdio> // Para o snprintf
+#include <stdio.h>
 
 void controller::application::init() {
     xTaskCreate(controller::application::handler,
@@ -14,21 +14,19 @@ void controller::application::init() {
 }
 
 void controller::application::handler(void *arg) {
-    int contador_fake = 0;
+    int leitura_simulada = 0;
     char payload_buffer[64];
 
     for (;;) {
         controller::led::set_status(true);
         vTaskDelay(pdMS_TO_TICKS(500));
         
-        // Simula uma leitura de sensor
-        contador_fake++;
-        snprintf(payload_buffer, sizeof(payload_buffer), "{\"temperatura\": %d}", 20 + (contador_fake % 10));
+        leitura_simulada++;
+        snprintf(payload_buffer, sizeof(payload_buffer), "{\"temperatura\": %d}", 20 + (leitura_simulada % 10));
         
-        // Manda o dado para a fila do MQTT
         controller::mqtt::publish("/tcc/cluster1/temperatura", payload_buffer);
 
         controller::led::set_status(false);
-        vTaskDelay(pdMS_TO_TICKS(4500)); // Envia a cada 5 segundos
+        vTaskDelay(pdMS_TO_TICKS(4500));
     }
 }
