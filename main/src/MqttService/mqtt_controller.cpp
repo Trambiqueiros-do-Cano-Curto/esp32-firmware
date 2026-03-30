@@ -6,12 +6,14 @@
 #include "mqtt_client.h"
 #include "esp_log.h"
 #include "string.h"
+#include "sdkconfig.h"
 
 static const char *TAG = "MQTT_CONTROLLER";
 
 static QueueHandle_t mqtt_queue;
 static EventGroupHandle_t network_event_group;
 static esp_mqtt_client_handle_t mqtt_client;
+static const EventBits_t WIFI_CONNECTED_BIT = BIT0;
 
 #define WIFI_CONNECTED_BIT (1 << 0)
 
@@ -41,7 +43,7 @@ void controller::mqtt::init(void) {
     network_event_group = xEventGroupCreate();
 
     esp_mqtt_client_config_t mqtt_cfg = {};
-    mqtt_cfg.broker.address.uri = "mqtt://192.168.15.18:1883"; 
+    mqtt_cfg.broker.address.uri = CONFIG_MQTT_BROKER_URI;
     
     mqtt_client = esp_mqtt_client_init(&mqtt_cfg);
     esp_mqtt_client_register_event(mqtt_client, MQTT_EVENT_ANY, mqtt_event_handler, NULL);
@@ -62,7 +64,7 @@ void controller::mqtt::handler(void *arg) {
                                 pdTRUE,
                                 portMAX_DELAY); 
 
-            int msg_id = esp_mqtt_client_publish(mqtt_client, msg.topic, msg.payload, 0, 1, 0);
+            int32_t msg_id = esp_mqtt_client_publish(mqtt_client, msg.topic, msg.payload, 0, 1, 0);
             
             if (msg_id >= 0) {
                 ESP_LOGI(TAG, "Payload publicado: [%s] no topico [%s]", msg.payload, msg.topic);
@@ -83,6 +85,10 @@ void controller::mqtt::publish(const char* topic, const char* payload) {
     msg.payload[sizeof(msg.payload) - 1] = '\0';
 
     xQueueSend(mqtt_queue, &msg, portMAX_DELAY);
+
+    if (xQueueSend(mqtt_queue, &msg, pdMS_TO_TICKS(100)) != pdTRUE) {
+        ESP_LOGE(TAG, "Fila MQTT cheia, mensagem descartada.");
+    }
 }
 
 void controller::mqtt::set_wifi_status(bool connected) {

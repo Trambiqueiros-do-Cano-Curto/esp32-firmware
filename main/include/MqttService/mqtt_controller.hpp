@@ -1,19 +1,18 @@
 #ifndef MQTT_CONTROLLER_H
 #define MQTT_CONTROLLER_H
 
-#include "freertos/FreeRTOS.h"
-#include "freertos/event_groups.h"
+#include <cstddef>
 #include <stdint.h>
 
 namespace controller::mqtt {
 
-typedef struct {
-    char topic[64];
-    char payload[256];
-} mqtt_msg_t;
+constexpr std::size_t TOPIC_BUFFER_SIZE = 64;
+constexpr std::size_t PAYLOAD_BUFFER_SIZE = 256;
 
-extern const int WIFI_CONNECTED_BIT;
-extern EventGroupHandle_t mqtt_event_group;
+typedef struct {
+    char topic[TOPIC_BUFFER_SIZE];
+    char payload[PAYLOAD_BUFFER_SIZE];
+} mqtt_msg_t;
 
 void init();
 void handler(void *arg);

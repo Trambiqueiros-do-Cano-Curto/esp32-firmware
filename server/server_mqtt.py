@@ -20,8 +20,7 @@ def init_db():
 
 def on_connect(client, userdata, flags, rc, properties):
     print(f"Conexão estabelecida com o Broker MQTT. Codigo de retorno: {rc}")
-    client.subscribe("/tcc/cluster1/temperatura")
-    print("Inscricao realizada no topico: /tcc/cluster1/temperatura")
+    client.subscribe("/tcc/#")
 
 def on_message(client, userdata, msg):
     payload = msg.payload.decode('utf-8')
@@ -29,19 +28,19 @@ def on_message(client, userdata, msg):
     
     try:
         dados = json.loads(payload)
-        
-        # Suporta payload no formato de lista de dicionarios ou dicionario unico
         if isinstance(dados, list) and len(dados) > 0:
-            temp = dados[0].get("temperatura")
+            temp = dados[0].get("temperature")
         else:
-            temp = dados.get("temperatura")
+            temp = dados.get("temperature")
         
         if temp is not None:
             conn = sqlite3.connect(DB_NAME)
+
             cursor = conn.cursor()
             cursor.execute("INSERT INTO leituras (topico, temperatura) VALUES (?, ?)", (msg.topic, temp))
             conn.commit()
             conn.close()
+            
             print(f"Registro gravado: {temp}°C")
             
     except json.JSONDecodeError:
