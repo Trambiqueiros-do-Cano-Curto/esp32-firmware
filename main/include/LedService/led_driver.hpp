@@ -5,8 +5,10 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-void led_driver_init(gpio_num_t pin);
-void led_driver_set(gpio_num_t pin, bool state);
-void led_driver_toggle(gpio_num_t pin);
+namespace driver::led {
+    void init(gpio_num_t pin);
+    void set_gpio(gpio_num_t pin, bool state);
+}
+
 
 #endif

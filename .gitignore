@@ -1,24 +1,74 @@
-.pytest_cache/
-__pycache__/
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
 
-# esp-idf built binaries
+# Linux / Unix
+.directory
+*~
+*.swp
+*.swo
+*.bak
+*.tmp
+.ccache/
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Diretórios de build (Raiz e subpastas)
 build/
-build_*_*/
-sdkconfig
+**/build/
 
-# idf-ci build run output
+# Binários e arquivos gerados
+*.bin
+*.elf
+*.map
+*.o
+*.a
+*.out
+*.exe
+flasher_args.json
+
+# Configurações locais (NÃO versionar sdkconfig local)
+sdkconfig
+sdkconfig.old
+
+# Logs e relatórios de CI
+*.log
 build_summary_*.xml
 app_info_*.txt
 size_info_*.txt
-
-# pytest-embedded log folder
 pytest_embedded_log/
 
-# idf-component-manager output
+# ESP-IDF Component Manager
 dependencies.lock
+managed_components/
 
-# vscode
-.vscode/
+# Python: Bytecode e Ambientes Virtuais
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+venv/
+.venv/
+env/
+*.egg-info/
+dist/
 
-#clangd
+# clangd e Language Servers
+.clangd/
 .cache/
+.ccls-cache/
+compile_commands.json
+
+# VS Code
+.vscode/*
+!.vscode/extensions.json
+
+# Variáveis de ambiente
+.env
+.env.*
+!.env.example

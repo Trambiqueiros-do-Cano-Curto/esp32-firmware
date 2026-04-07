@@ -1,0 +1,22 @@
+menu "Wi-Fi Configuration"
+    config WIFI_SSID
+        string "SSID do Wi-Fi"
+        default ""
+        help
+            Nome da rede Wi-Fi que o ESP32 deve conectar.
+
+    config WIFI_PASSWORD
+        string "Senha do Wi-Fi"
+        default ""
+        help
+            Senha da rede Wi-Fi.
+
+endmenu
+
+menu "MQTT Configuration"
+    config MQTT_BROKER_URI
+        string "MQTT Broker URI"
+        default "mqtt://192.168.15.18:1883"
+        help
+            Endereço do Broker MQTT.
+endmenu
