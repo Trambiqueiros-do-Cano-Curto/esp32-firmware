@@ -11,7 +11,8 @@ void controller::led::init(void) {
 
     led_queue = xQueueCreate(10, sizeof(led_cmd_t));
 
-    xTaskCreate(controller::led::handler, "led_controller", 2048, NULL, 5, NULL);
+    xTaskCreate(controller::led::handler, "led_controller", 2048, NULL, 5,
+                NULL);
 }
 
 void controller::led::handler(void *arg) {
