@@ -16,4 +16,6 @@ typedef struct {
 void init();
 void handler(void *arg);
 
+void ping_neighborhood();
+
 } // namespace controller::network

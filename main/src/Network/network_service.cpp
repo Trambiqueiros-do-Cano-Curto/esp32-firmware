@@ -1,5 +1,7 @@
 #include "Network/network_service.hpp"
 #include "Network/esp_now_driver.hpp"
+#include "esp_err.h"
+#include "esp_log.h"
 
 #include <array>
 #include <cstdint>
@@ -18,11 +20,19 @@ void handler() {}
 
 void ping_all_devices_connected() {
 
-    std::array<uint8_t, HEADER_CMD> data = {
-        ESP
-    }
+    esp_err_t ret;
 
-    driver::network::esp_now::send_broadcast(const uint8_t *data, size_t len)
+    std::array<uint8_t, HEADER_CMD> data = {
+        static_cast<uint8_t>(RxCommand::PING),
+    };
+
+    ret = driver::network::esp_now::send_broadcast(data.data(), data.size());
+
+    if (ret == ESP_OK) {
+        ESP_LOGI(__FUNCTION__, "Succesful!");
+    } else {
+        ESP_LOGE(__FUNCTION__, "Failed! Error: %u", ret);
+    }
 }
 
 } // namespace service::network

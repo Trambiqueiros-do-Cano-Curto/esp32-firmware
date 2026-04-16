@@ -1,11 +1,9 @@
-#ifndef WIFI_DRIVER_H
-#define WIFI_DRIVER_H
+#pragma once
 
 #include "esp_wifi.h"
 
 namespace driver::wifi {
-    void init();
+
+void init();
+
 }
-
-
-#endif
