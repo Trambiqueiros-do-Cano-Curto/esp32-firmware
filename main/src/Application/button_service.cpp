@@ -26,7 +26,7 @@ void init() {
 }
 
 void buttonReleased() {
-    controller::network::ping_neighborhood();
+    controller::network::send_ping_broadcast();
     controller::led::set_status(0);
 }
 

@@ -1,21 +1,18 @@
 #pragma once
 
+#include <array>
+#include <cstdint>
+
 namespace controller::network {
 
-#define MAX_MSG_ESP_NOW 50u
+constexpr uint16_t MAX_MSG_ESP_NOW = 50u;
 
-enum cmd_type {
-    PINGALL,
-};
-
-typedef struct {
-    cmd_type type;
-    void *value;
-} network_cmd_t;
+typedef std::array<uint8_t, 6> MacAddr;
 
 void init();
 void handler(void *arg);
 
-void ping_neighborhood();
+void send_ping_broadcast();
+void send_ping_device(MacAddr macAddr);
 
 } // namespace controller::network

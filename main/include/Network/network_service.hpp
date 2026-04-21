@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Network/network_controller.hpp"
 #include <cstdint>
 namespace service::network {
 
@@ -16,6 +17,7 @@ enum class TxCommand : uint8_t {
 void init();
 void handler();
 
-void ping_all_devices_connected();
+void ping_broadcast();
+void ping_peer(controller::network::MacAddr dest_mac);
 
 } // namespace service::network

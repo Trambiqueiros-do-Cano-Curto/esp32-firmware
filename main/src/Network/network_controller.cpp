@@ -8,8 +8,29 @@
 
 #include <array>
 #include <cstdint>
+#include <cstring>
 
 namespace controller::network {
+
+enum cmd_type {
+    PING_ALL,
+    PING_PEER,
+};
+
+typedef union {
+    struct {
+    } PING_ALL;
+
+    struct {
+        MacAddr dest_mac;
+    } PING_PEER;
+
+} network_cmd_data_t;
+
+typedef struct {
+    cmd_type type;
+    network_cmd_data_t data;
+} network_cmd_t;
 
 static QueueHandle_t network_queue;
 
@@ -28,8 +49,11 @@ void handler(void *arg) {
     for (;;) {
         if (xQueueReceive(network_queue, &cmd, portMAX_DELAY)) {
             switch (cmd.type) {
-            case PINGALL:
-                service::network::ping_all_devices_connected();
+            case PING_ALL:
+                service::network::ping_broadcast();
+                break;
+            case PING_PEER:
+                service::network::ping_peer(cmd.data.PING_PEER.dest_mac);
                 break;
             }
         }
@@ -38,10 +62,19 @@ void handler(void *arg) {
     service::network::handler();
 }
 
-void ping_neighborhood() {
-    network_cmd_t cmd = {.type = PINGALL, .value = 0};
+void send_ping_device(MacAddr addr) {
+    network_cmd_data_t data;
+
+    memcpy(data.PING_PEER.dest_mac.data(), addr.data(), sizeof(addr));
+
+    network_cmd_t cmd = {.type = PING_PEER, .data = data};
 
     xQueueSend(network_queue, &cmd, portMAX_DELAY);
 };
 
+void send_ping_broadcast() {
+    network_cmd_t cmd = {.type = PING_ALL, .data = {.PING_ALL = {}}};
+
+    xQueueSend(network_queue, &cmd, portMAX_DELAY);
+};
 } // namespace controller::network
