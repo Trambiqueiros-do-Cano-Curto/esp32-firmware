@@ -35,6 +35,12 @@ void ping_all_devices_connected() {
     };
 
     ret = driver::network::esp_now::send_broadcast(data.data(), data.size());
+
+    if (ret == ESP_OK) {
+        ESP_LOGI(__FUNCTION__, "Succesful!");
+    } else {
+        ESP_LOGE(__FUNCTION__, "Failed! Error: %u", ret);
+    }
 }
 
 } // namespace service::network

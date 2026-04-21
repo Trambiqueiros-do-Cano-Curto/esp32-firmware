@@ -5,17 +5,19 @@
 #include "hal/gpio_types.h"
 #include "soc/gpio_num.h"
 
+#include "esp_log.h"
+
 #include "utils.hpp"
 
 #include "Network/network_controller.hpp"
 
 namespace service::button {
 
-constexpr gpio_num_t nBOOT_BUTTON = GPIO_NUM_0;
+constexpr gpio_num_t nBOOT_BUTTON = GPIO_NUM_9;
 
 void init() {
     gpio_config_t config = {.pin_bit_mask = (1ULL << nBOOT_BUTTON),
-                            .mode = GPIO_MODE_OUTPUT,
+                            .mode = GPIO_MODE_INPUT,
                             .pull_up_en = GPIO_PULLUP_DISABLE,
                             .pull_down_en = GPIO_PULLDOWN_DISABLE,
                             .intr_type = GPIO_INTR_DISABLE};
@@ -35,6 +37,12 @@ void buttonPressed() {
 void handler() {
     static Timer buttonTime;
     static bool lastState = 0;
+
+    if (!buttonTime.hasElapsed(100)) {
+        return;
+    }
+
+    buttonTime.reset();
 
     bool state = gpio_get_level(nBOOT_BUTTON);
 

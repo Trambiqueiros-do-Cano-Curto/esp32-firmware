@@ -7,6 +7,7 @@
 #include "Application/nvs_service.hpp"
 
 #include "freertos/idf_additions.h"
+#include "portmacro.h"
 
 void controller::application::init() {
 
@@ -24,6 +25,6 @@ void controller::application::init() {
 void controller::application::handler(void *arg) {
     for (;;) {
         service::button::handler();
-        vTaskDelay(50);
+        vTaskDelay(10 / portTICK_PERIOD_MS);
     }
 }
