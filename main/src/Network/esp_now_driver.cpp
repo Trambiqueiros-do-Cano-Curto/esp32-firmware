@@ -3,6 +3,7 @@
 #include "esp_mac.h"
 #include "espnow.h"
 
+#include <cstdint>
 #include <esp_now.h>
 
 namespace driver::network::esp_now {
@@ -23,6 +24,16 @@ uint8_t *data_macs(uint8_t *option) {
     }
 }
 
+void rx_callback(const esp_now_recv_info_t *info, const uint8_t *data,
+                 int size) {
+    const char *TAG = "app_main";
+
+    ESP_LOGI(TAG, "Recebido de [" MACSTR "]: %.*s", MAC2STR(info->src_addr),
+             size, (char *)data);
+
+    // implementação futura de fila de pacotes
+}
+
 void init() {
     uart_config_t uart_config = {.baud_rate = 115200,
                                  .data_bits = UART_DATA_8_BITS,
@@ -37,6 +48,7 @@ void init() {
 #endif
                                  .flags = {0, 0}};
 
+    // Existing UART setup...
     ESP_ERROR_CHECK(uart_param_config((uart_port_t)0, &uart_config));
     ESP_ERROR_CHECK(uart_set_pin((uart_port_t)0, UART_PIN_NO_CHANGE,
                                  UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE,
@@ -44,6 +56,18 @@ void init() {
     ESP_ERROR_CHECK(uart_driver_install((uart_port_t)0,
                                         8 * ESP_NOW_MAX_DATA_LEN,
                                         8 * ESP_NOW_MAX_DATA_LEN, 0, NULL, 0));
+
+    // Initialize ESP-NOW
+    ESP_ERROR_CHECK(esp_now_init());
+    ESP_ERROR_CHECK(esp_now_register_recv_cb(rx_callback));
+
+    // Add broadcast peer
+    esp_now_peer_info_t peer = {};
+    peer.channel = 0; // Use current channel
+    peer.ifidx = WIFI_IF_STA;
+    peer.encrypt = false;
+    memcpy(peer.peer_addr, ESPNOW_ADDR_BROADCAST, ESP_NOW_ETH_ALEN);
+    ESP_ERROR_CHECK(esp_now_add_peer(&peer));
 }
 
 esp_err_t send_unicast(const uint8_t *dest_mac, const uint8_t *data,
@@ -55,20 +79,6 @@ esp_err_t send_unicast(const uint8_t *dest_mac, const uint8_t *data,
 esp_err_t send_broadcast(const uint8_t *data, size_t len) {
 
     return esp_now_send(ESPNOW_ADDR_BROADCAST, data, len);
-}
-
-esp_err_t rx_callback(uint8_t *src_addr, void *data, size_t size,
-                      wifi_pkt_rx_ctrl_t *rx_ctrl) {
-    const char *TAG = "app_main";
-    ESP_PARAM_CHECK(src_addr);
-    ESP_PARAM_CHECK(data);
-
-    ESP_LOGI(TAG, "Recebido de [" MACSTR "]: %.*s", MAC2STR(src_addr), size,
-             (char *)data);
-
-    // implementação futura de fila de pacotes
-
-    return ESP_OK;
 }
 
 } // namespace driver::network::esp_now

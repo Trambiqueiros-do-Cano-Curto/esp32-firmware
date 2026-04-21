@@ -14,8 +14,8 @@ namespace controller::network {
 static QueueHandle_t network_queue;
 
 void init() {
+    driver::wifi::init();
     driver::network::esp_now::init();
-    // driver::wifi::init();
 
     network_queue = xQueueCreate(10, sizeof(network_cmd_t));
 
