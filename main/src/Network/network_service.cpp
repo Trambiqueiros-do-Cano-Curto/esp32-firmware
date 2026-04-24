@@ -11,23 +11,21 @@ namespace service::network {
 
 using controller::network::MacAddr;
 
-static constexpr uint8_t MAX_DEVICE_TABLE = 10;
-
 static constexpr uint8_t HEADER_CMD = 1;
-
-static std::array<uint32_t, MAX_DEVICE_TABLE> devices;
 
 void init() {}
 
 void handler() {}
 
-// =============================
-// Ingoing functions
-// =============================
+// ===============================================
+// # Ingoing functions
+// ===============================================
 
-// =============================
-// Outgoing functions
-// =============================
+void ping_received() {}
+
+// ===============================================
+// # Outgoing functions
+// ===============================================
 
 void ping_peer(MacAddr dest_mac) {
     esp_err_t ret;

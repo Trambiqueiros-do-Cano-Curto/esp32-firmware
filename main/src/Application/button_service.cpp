@@ -26,7 +26,7 @@ void init() {
 }
 
 void buttonReleased() {
-    controller::network::send_ping_broadcast();
+    controller::network::send_ping_device({0x1c, 0xdb, 0xd4, 0xf1, 0x4f, 0x00});
     controller::led::set_status(0);
 }
 
