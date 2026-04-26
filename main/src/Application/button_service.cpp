@@ -25,17 +25,14 @@ void init() {
     gpio_config(&config);
 }
 
-void buttonReleased() {
-    controller::network::send_ping_device({0x1c, 0xdb, 0xd4, 0xf1, 0x4f, 0x00});
-    controller::led::set_status(0);
-}
+void buttonReleased() {}
 
 void buttonPressed() {
     controller::led::set_status(1);
 }
 
 void handler() {
-    static Timer buttonTime;
+    static utils::Timer buttonTime;
     static bool lastState = 0;
 
     if (!buttonTime.hasElapsed(100)) {

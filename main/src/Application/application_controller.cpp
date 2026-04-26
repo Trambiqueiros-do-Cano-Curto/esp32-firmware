@@ -6,8 +6,10 @@
 #include "Application/button_service.hpp"
 #include "Application/nvs_service.hpp"
 
+#include "Network/network_service.hpp"
 #include "freertos/idf_additions.h"
 #include "portmacro.h"
+#include <cstdint>
 
 void controller::application::init() {
 

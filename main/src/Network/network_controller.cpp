@@ -4,6 +4,7 @@
 #include "Network/network_service.hpp"
 #include "Network/wifi_driver.hpp"
 
+#include "dhcpserver/dhcpserver_options.h"
 #include "freertos/idf_additions.h"
 
 #include <array>
@@ -15,6 +16,7 @@ namespace controller::network {
 enum cmd_type {
     PING_ALL,
     PING_PEER,
+    ADD_PEAR,
 };
 
 typedef union {
@@ -24,6 +26,11 @@ typedef union {
     struct {
         MacAddr dest_mac;
     } PING_PEER;
+
+    struct {
+        MacAddr peer_mac;
+        uint8_t peer_channel;
+    } ADD_PEER;
 
 } network_cmd_data_t;
 
@@ -38,6 +45,8 @@ void init() {
     driver::wifi::init();
     driver::network::esp_now::init();
 
+    service::network::init();
+
     network_queue = xQueueCreate(10, sizeof(network_cmd_t));
 
     xTaskCreate(handler, "network_controller", 2048, NULL, 5, NULL);
@@ -47,7 +56,7 @@ void handler(void *arg) {
     network_cmd_t cmd;
 
     for (;;) {
-        if (xQueueReceive(network_queue, &cmd, portMAX_DELAY)) {
+        if (xQueueReceive(network_queue, &cmd, pdMS_TO_TICKS(50))) {
             switch (cmd.type) {
             case PING_ALL:
                 service::network::ping_broadcast();
@@ -55,11 +64,15 @@ void handler(void *arg) {
             case PING_PEER:
                 service::network::ping_peer(cmd.data.PING_PEER.dest_mac);
                 break;
+            case ADD_PEAR:
+                service::network::add_esp_peer(cmd.data.ADD_PEER.peer_mac,
+                                               cmd.data.ADD_PEER.peer_channel);
+                break;
             }
         }
-    }
 
-    service::network::handler();
+        service::network::handler();
+    }
 }
 
 void send_ping_device(MacAddr addr) {
@@ -77,4 +90,10 @@ void send_ping_broadcast() {
 
     xQueueSend(network_queue, &cmd, portMAX_DELAY);
 };
+
+void add_pear() {
+    network_cmd_t cmd = {.type = ADD_PEAR, .data = {.PING_ALL = {}}};
+
+    xQueueSend(network_queue, &cmd, portMAX_DELAY);
+}
 } // namespace controller::network
