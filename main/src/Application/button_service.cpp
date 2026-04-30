@@ -11,7 +11,7 @@
 
 #include "Network/network_controller.hpp"
 
-namespace service::button {
+namespace service::application::button {
 
 constexpr gpio_num_t nBOOT_BUTTON = GPIO_NUM_9;
 
@@ -54,4 +54,4 @@ void handler() {
     lastState = state;
 }
 
-} // namespace service::button
+} // namespace service::application::button

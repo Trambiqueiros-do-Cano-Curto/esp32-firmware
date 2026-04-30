@@ -1,9 +1,9 @@
 #pragma once
 
-namespace service::button {
+namespace service::application::button {
 
 void init();
 
 void handler();
 
-} // namespace service::button
+} // namespace service::application::button

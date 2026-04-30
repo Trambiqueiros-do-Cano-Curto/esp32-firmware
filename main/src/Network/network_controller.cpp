@@ -49,7 +49,7 @@ void init() {
 
     network_queue = xQueueCreate(10, sizeof(network_cmd_t));
 
-    xTaskCreate(handler, "network_controller", 2048, NULL, 5, NULL);
+    xTaskCreate(handler, "network_controller", 4096, NULL, 5, NULL);
 }
 
 void handler(void *arg) {

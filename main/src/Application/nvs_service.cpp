@@ -3,7 +3,7 @@
 #include "esp_err.h"
 #include "nvs_flash.h"
 
-namespace service::nvs {
+namespace service::application::nvs {
 
 void init() {
     esp_err_t err = nvs_flash_init();
@@ -11,4 +11,4 @@ void init() {
     ESP_ERROR_CHECK(err);
 }
 
-} // namespace service::nvs
+} // namespace service::application::nvs

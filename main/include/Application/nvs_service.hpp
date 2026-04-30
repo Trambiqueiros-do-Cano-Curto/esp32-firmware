@@ -1,6 +1,6 @@
 #pragma once
 
-namespace service::nvs {
+namespace service::application::nvs {
 
 void init();
 

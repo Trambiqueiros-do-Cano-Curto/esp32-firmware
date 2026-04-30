@@ -16,7 +16,6 @@ struct Timer {
     bool hasElapsed(unsigned long interval) {
         unsigned long now = esp_timer_get_time() / 1000;
         if (now - last >= interval) {
-            last = now; // auto reset
             return true;
         }
         return false;
