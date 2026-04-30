@@ -11,6 +11,11 @@
 #include "freertos/idf_additions.h"
 #include "portmacro.h"
 #include <cstdint>
+#include "MqttService/mqtt_controller.hpp"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "esp_log.h"
+#include <stdio.h>
 
 void controller::application::init() {
 
@@ -27,6 +32,9 @@ void controller::application::init() {
 }
 
 void controller::application::handler(void *arg) {
+    uint32_t simulated_reading = 0;
+    char payload_buffer[64];
+
     for (;;) {
         service::application::button::handler();
         service::application::discover::handler();
