@@ -60,7 +60,7 @@ void rx_callback(const esp_now_recv_info_t *info, const uint8_t *data,
                  MAC2STR(info->src_addr));
     }
 
-    static Packet packet;
+    Packet packet;
 
     memset(&packet, 0, sizeof(packet));
     memcpy(&packet, data, size);
@@ -175,7 +175,7 @@ Packet packer(RxCommand cmd, MacAddr dest_mac, std::span<const uint8_t> data) {
 void send_msg(RxCommand cmd, MacAddr dest_addr, std::span<const uint8_t> data) {
     Packet packet = packer(cmd, dest_addr, data);
 
-    if (memcmp(packet.dest_mac, MY_MAC.data(), sizeof(MY_MAC))) {
+    if (memcmp(packet.dest_mac, MY_MAC.data(), sizeof(MY_MAC)) == 0) {
         return;
     };
 
