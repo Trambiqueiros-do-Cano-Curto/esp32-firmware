@@ -5,24 +5,17 @@
 #include "Application/application_controller.hpp"
 #include "Application/button_service.hpp"
 #include "Application/discover_service.hpp"
-#include "Application/nvs_service.hpp"
 
 #include "Network/network_service.hpp"
-#include "freertos/idf_additions.h"
-#include "portmacro.h"
-#include <cstdint>
 #include "MqttService/mqtt_controller.hpp"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "esp_log.h"
-#include <stdio.h>
 
 void controller::application::init() {
-
-    service::application::nvs::init();
-
     controller::led::init();
     controller::network::init();
+    controller::mqtt::init();
 
     service::application::button::init();
     service::application::discover::init();
@@ -32,9 +25,6 @@ void controller::application::init() {
 }
 
 void controller::application::handler(void *arg) {
-    uint32_t simulated_reading = 0;
-    char payload_buffer[64];
-
     for (;;) {
         service::application::button::handler();
         service::application::discover::handler();

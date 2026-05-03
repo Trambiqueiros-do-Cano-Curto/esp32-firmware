@@ -35,11 +35,12 @@ void handler() {
 // ===============================================
 
 void ping_received(Packet packet) {
-    ESP_LOGI(__FUNCTION__, "Ping received from " MACSTR,
-             MAC2STR(packet.src_mac));
+    MacAddr sender;
+    memcpy(sender.data(), packet.src_mac, sizeof(sender));
 
-    MacAddr macAddr;
-    memcpy(&macAddr, packet.src_mac, sizeof(macAddr));
+    add_esp_peer(sender, 0);
+
+    ESP_LOGI(__FUNCTION__, "Ping received from " MACSTR, MAC2STR(packet.src_mac));
 }
 
 // ===============================================
