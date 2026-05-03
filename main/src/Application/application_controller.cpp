@@ -1,5 +1,16 @@
-#include "Application/application_controller.hpp"
 #include "LedService/led_controller.hpp"
+
+#include "Network/network_controller.hpp"
+
+#include "Application/application_controller.hpp"
+#include "Application/button_service.hpp"
+#include "Application/discover_service.hpp"
+#include "Application/nvs_service.hpp"
+
+#include "Network/network_service.hpp"
+#include "freertos/idf_additions.h"
+#include "portmacro.h"
+#include <cstdint>
 #include "MqttService/mqtt_controller.hpp"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -7,6 +18,15 @@
 #include <stdio.h>
 
 void controller::application::init() {
+
+    service::application::nvs::init();
+
+    controller::led::init();
+    controller::network::init();
+
+    service::application::button::init();
+    service::application::discover::init();
+
     xTaskCreate(controller::application::handler,
                 "application_controller_handler", 4096, NULL, 5, NULL);
 }
@@ -16,15 +36,8 @@ void controller::application::handler(void *arg) {
     char payload_buffer[64];
 
     for (;;) {
-        controller::led::set_status(true);
-        vTaskDelay(pdMS_TO_TICKS(500));
-        
-        simulated_reading++;
-        snprintf(payload_buffer, sizeof(payload_buffer), "{\"temperature\": %lu}", 20 + (unsigned long)(simulated_reading % 10));
-        
-        controller::mqtt::publish("/tcc/cluster1/temperature", payload_buffer);
-
-        controller::led::set_status(false);
-        vTaskDelay(pdMS_TO_TICKS(4500));
+        service::application::button::handler();
+        service::application::discover::handler();
+        vTaskDelay(10 / portTICK_PERIOD_MS);
     }
 }
