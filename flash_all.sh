@@ -130,13 +130,23 @@ fi
 
 echo -e "${CYAN}Usando terminal: $TERM_BIN${NC}"
 
+# Diretório de logs (criado automaticamente, ignorado pelo git)
+LOG_DIR="$SCRIPT_DIR/logs"
+mkdir -p "$LOG_DIR"
+
 open_monitor() {
     local PORT="$1"
+    local PORT_NAME
+    PORT_NAME="$(basename "$PORT")"
+    local LOG_FILE="$LOG_DIR/${PORT_NAME}.log"
     local TITLE="ESP Monitor — $PORT"
+
+    # Terminal mostra saída colorida; arquivo recebe saída sem códigos ANSI.
+    # tee >(sed ...) mantém as cores no terminal e salva limpo no arquivo.
     local CMD
     CMD="$(printf \
-        'source %q 2>/dev/null; idf.py -p %q monitor; echo; echo "Monitor encerrado. Pressione Enter para fechar."; read' \
-        "$IDF_EXPORT" "$PORT")"
+        'source %q 2>/dev/null; idf.py -p %q monitor 2>&1 | tee >( sed "s/\x1b\[[0-9;]*[mGKHF]//g" > %q ); echo; echo "Monitor encerrado. Pressione Enter para fechar."; read' \
+        "$IDF_EXPORT" "$PORT" "$LOG_FILE")"
 
     case "$TERM_BIN" in
         kitty)
@@ -156,6 +166,8 @@ open_monitor() {
         *)
             "$TERM_BIN" -title "$TITLE" -e bash -c "$CMD" ;;
     esac &
+
+    echo -e "${CYAN}  Log: $LOG_FILE${NC}"
 }
 
 for PORT in "${PORTS[@]}"; do
