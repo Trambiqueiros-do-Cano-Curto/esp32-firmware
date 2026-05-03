@@ -24,12 +24,17 @@ static bool  reading_available    = false;
 static float received_temperature = 0.0f;
 static MacAddr received_sender{};
 
+static bool   rotate_available   = false;
+static MacAddr rotate_next_leader{};
+
 void ping_received(Packet packet);
 void reading_received(Packet packet);
+void rotate_received(Packet packet);
 
 void init() {
     register_rx_callback(ping_received,    RxCommand::PING);
     register_rx_callback(reading_received, RxCommand::READING);
+    register_rx_callback(rotate_received,  RxCommand::ROTATE);
 }
 
 void handler() {
@@ -109,6 +114,39 @@ void send_reading(MacAddr dest_mac, float temperature) {
     memcpy(data.data(), &payload, sizeof(payload));
 
     driver::network::esp_now::send_msg(RxCommand::READING, dest_mac, data);
+}
+
+void rotate_received(Packet packet) {
+    RotatePayload payload{};
+    memcpy(&payload, packet.data, sizeof(payload));
+
+    memcpy(rotate_next_leader.data(), payload.next_leader, sizeof(rotate_next_leader));
+    rotate_available = true;
+
+    ESP_LOGI(__FUNCTION__, "Rotate received: next leader " MACSTR,
+             MAC2STR(payload.next_leader));
+}
+
+bool has_received_rotate() {
+    if (rotate_available) {
+        rotate_available = false;
+        return true;
+    }
+    return false;
+}
+
+MacAddr get_rotate_next_leader() {
+    return rotate_next_leader;
+}
+
+void send_rotate(MacAddr next_leader) {
+    RotatePayload payload{};
+    memcpy(payload.next_leader, next_leader.data(), sizeof(payload.next_leader));
+
+    std::array<uint8_t, sizeof(RotatePayload)> data{};
+    memcpy(data.data(), &payload, sizeof(payload));
+
+    driver::network::esp_now::send_broadcast(RxCommand::ROTATE, data);
 }
 
 } // namespace service::network

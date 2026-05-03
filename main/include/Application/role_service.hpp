@@ -18,5 +18,6 @@ Role get_role();
 bool is_leader();
 controller::network::MacAddr get_leader_mac();
 void on_peer_discovered();
+void on_rotate_received(controller::network::MacAddr next_leader);
 
 } // namespace service::application::role

@@ -41,6 +41,11 @@ void controller::application::handler(void *arg) {
         service::application::role::handler();
         service::application::reading::handler();
 
+        if (service::network::has_received_rotate()) {
+            service::application::role::on_rotate_received(
+                service::network::get_rotate_next_leader());
+        }
+
         switch (service::application::role::get_role()) {
         case service::application::role::Role::LEADER:
             handle_leader();
