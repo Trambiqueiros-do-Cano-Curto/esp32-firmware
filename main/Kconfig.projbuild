@@ -16,7 +16,19 @@ endmenu
 menu "MQTT Configuration"
     config MQTT_BROKER_URI
         string "MQTT Broker URI"
-        default "mqtt://192.168.15.18:1883"
+        default "mqtt://64.181.160.152:1883"
         help
             Endereço do Broker MQTT.
+
+    config MQTT_BROKER_USERNAME
+        string "MQTT Broker Username"
+        default "tcc"
+        help
+            Nome de usuário do Broker MQTT.
+
+    config MQTT_BROKER_PASSWORD
+        string "MQTT Broker Password"
+        default "larsmM"
+        help
+            Senha do Broker MQTT.
 endmenu

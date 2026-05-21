@@ -7,6 +7,7 @@
 #include "esp_log.h"
 #include "string.h"
 #include "sdkconfig.h"
+#include "esp_mac.h"
 
 static const char *TAG = "MQTT_CONTROLLER";
 
@@ -15,17 +16,28 @@ static EventGroupHandle_t network_event_group;
 static esp_mqtt_client_handle_t mqtt_client;
 
 static const EventBits_t WIFI_CONNECTED_BIT = BIT0;
+static const EventBits_t MQTT_CONNECTED_BIT = BIT1; 
 
 static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_t event_id, void *event_data) {
+    esp_mqtt_event_handle_t event = (esp_mqtt_event_handle_t)event_data;
+    esp_mqtt_client_handle_t client = event->client;
+
     switch ((esp_mqtt_event_id_t)event_id) {
-        case MQTT_EVENT_CONNECTED:
+        case MQTT_EVENT_CONNECTED: {
+            xEventGroupSetBits(network_event_group, MQTT_CONNECTED_BIT); 
             ESP_LOGI(TAG, "Conexao estabelecida com o broker MQTT.");
+
+            const char *topico = "v1/dispositivo/teste";
+            const char *payload = "{\"temperatura\": 25.5, \"umidade\": 60}";
+            controller::mqtt::publish(topico, payload);
+
             break;
+        }
         case MQTT_EVENT_DISCONNECTED:
+            xEventGroupClearBits(network_event_group, MQTT_CONNECTED_BIT);
             ESP_LOGW(TAG, "Desconectado do broker MQTT.");
             break;
         case MQTT_EVENT_PUBLISHED: {
-            esp_mqtt_event_handle_t event = (esp_mqtt_event_handle_t)event_data;
             ESP_LOGI(TAG, "Mensagem publicada. ID: %d", event->msg_id);
             break;
         }
@@ -41,8 +53,20 @@ void controller::mqtt::init(void) {
     mqtt_queue = xQueueCreate(10, sizeof(mqtt_msg_t));
     network_event_group = xEventGroupCreate();
 
+    uint8_t mac[6];
+    esp_read_mac(mac, ESP_MAC_WIFI_STA);
+    
+    static char client_id[30];
+    snprintf(client_id, sizeof(client_id), "esp32_%02x%02x%02x%02x%02x%02x", 
+             mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+
     esp_mqtt_client_config_t mqtt_cfg = {};
     mqtt_cfg.broker.address.uri = CONFIG_MQTT_BROKER_URI;
+    mqtt_cfg.credentials.username = CONFIG_MQTT_BROKER_USERNAME;
+    mqtt_cfg.credentials.authentication.password = CONFIG_MQTT_BROKER_PASSWORD;
+    mqtt_cfg.credentials.client_id = client_id;
+    mqtt_cfg.network.timeout_ms = 10000;
+    mqtt_cfg.session.keepalive = 15;
 
     mqtt_client = esp_mqtt_client_init(&mqtt_cfg);
     esp_mqtt_client_register_event(mqtt_client, MQTT_EVENT_ANY, mqtt_event_handler, NULL);
@@ -57,7 +81,7 @@ void controller::mqtt::handler(void *arg) {
     for (;;) {
         if (xQueueReceive(mqtt_queue, &msg, portMAX_DELAY)) {
             xEventGroupWaitBits(network_event_group,
-                                WIFI_CONNECTED_BIT,
+                                MQTT_CONNECTED_BIT, 
                                 pdFALSE,
                                 pdTRUE,
                                 portMAX_DELAY);
