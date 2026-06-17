@@ -6,6 +6,7 @@
 #include "esp_log.h"
 #include "esp_netif.h"
 #include "esp_wifi.h"
+#include "esp_wifi_types_generic.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/timers.h"
 #include <string.h>
@@ -99,7 +100,7 @@ void driver::wifi::init() {
     strcpy((char *)wifi_config.sta.ssid, CONFIG_WIFI_SSID);
     strcpy((char *)wifi_config.sta.password, CONFIG_WIFI_PASSWORD);
 
-    wifi_config.sta.threshold.authmode = WIFI_AUTH_WPA2_PSK;
+    wifi_config.sta.threshold.authmode = WIFI_AUTH_OPEN;
     wifi_config.sta.pmf_cfg.capable = true;
     wifi_config.sta.pmf_cfg.required = false;
     wifi_config.sta.sae_pwe_h2e = WPA3_SAE_PWE_BOTH;
