@@ -3,3 +3,10 @@
 # esp_now_set_wake_window (ver Network/wifi_driver.cpp).
 CONFIG_PM_ENABLE=y
 CONFIG_FREERTOS_USE_TICKLESS_IDLE=y
+
+# STA desassociado NAO deve entrar em modem-sleep por conta propria: o estado
+# do radio do membro e' governado explicitamente por papel (esp_wifi_set_ps +
+# wake-window em wifi_driver.cpp). Sem isto (default do IDF e' y), o ensaio de
+# controle (MEMBER_POWER_SAVE=n) pode nao mostrar o baseline de ~80 mA e o boot
+# (STA desassociado com PS_NONE) poderia dormir o radio indevidamente.
+CONFIG_ESP_WIFI_STA_DISCONNECTED_PM_ENABLE=n
