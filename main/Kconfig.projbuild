@@ -248,3 +248,33 @@ menu "RTC / SNTP Configuration"
             String POSIX de fuso horario. Padrao: Brasilia (UTC-3, sem
             horario de verao). O sinal POSIX e invertido: "<-03>3" = UTC-3.
 endmenu
+
+menu "Power Save (Member)"
+    config MEMBER_POWER_SAVE
+        bool "Economia de energia no papel MEMBER (duty-cycle do radio)"
+        default y
+        help
+            Quando habilitado, o no' no papel MEMBER coloca o radio em
+            duty-cycle (ESP-NOW wake-window) e permite light sleep da CPU.
+            Desabilite para o ensaio de controle (radio 100% RX) e medir o
+            delta de consumo com o INA219.
+
+    config MEMBER_WAKE_WINDOW_MS
+        int "Janela de escuta do radio (ms)"
+        depends on MEMBER_POWER_SAVE
+        range 10 65535
+        default 50
+        help
+            Tempo que o radio fica acordado em RX a cada intervalo. Deve ser
+            menor ou igual a MEMBER_WAKE_INTERVAL_MS.
+
+    config MEMBER_WAKE_INTERVAL_MS
+        int "Intervalo entre janelas de escuta (ms)"
+        depends on MEMBER_POWER_SAVE
+        range 10 65535
+        default 500
+        help
+            Periodo do duty-cycle do radio. A latencia de coordenacao do
+            membro fica ~= a este valor. 500 ms com janela de 50 ms ~= 10%
+            de duty cycle.
+endmenu

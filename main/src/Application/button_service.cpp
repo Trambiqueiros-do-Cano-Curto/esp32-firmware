@@ -65,22 +65,16 @@ void handler() {
             std::string run_id = service::application::run::generate_now();
             ESP_LOGW(TAG, "BOOT >= %u ms — reset ESCALONADO em rede (run=%s)",
                      RESET_STAGGERED_PRESS_MS, run_id.c_str());
-            for (int i = 0; i < 4; ++i) {
-                service::network::send_reset_energy_broadcast(
-                    service::network::ResetScenario::STAGGERED, run_id.c_str());
-                vTaskDelay(150 / portTICK_PERIOD_MS);
-            }
+            service::network::send_reset_energy_robust(
+                service::network::ResetScenario::STAGGERED, run_id.c_str());
             service::application::reset::apply_and_restart(
                 service::network::ResetScenario::STAGGERED, run_id.c_str());
         } else if (press_timer.hasElapsed(RESET_PRESS_MS)) {
             std::string run_id = service::application::run::generate_now();
             ESP_LOGW(TAG, "BOOT >= %u ms — reset CHEIO em rede (run=%s)",
                      RESET_PRESS_MS, run_id.c_str());
-            for (int i = 0; i < 4; ++i) {
-                service::network::send_reset_energy_broadcast(
-                    service::network::ResetScenario::FULL, run_id.c_str());
-                vTaskDelay(150 / portTICK_PERIOD_MS);
-            }
+            service::network::send_reset_energy_robust(
+                service::network::ResetScenario::FULL, run_id.c_str());
             service::application::reset::apply_and_restart(
                 service::network::ResetScenario::FULL, run_id.c_str());
         } else if (press_timer.hasElapsed(RESTART_PRESS_MS)) {

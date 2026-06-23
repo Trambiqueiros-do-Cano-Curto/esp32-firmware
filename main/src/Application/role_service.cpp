@@ -55,20 +55,26 @@ static MacAddr get_own_mac() {
     return mac;
 }
 
-// Single point of truth for role transitions: keeps the status LED in sync so
-// the LED can't drift out of phase with the actual role.
 static void set_role(Role new_role) {
     current_role = new_role;
     controller::led::set_status(new_role == Role::LEADER);
 
-    // Gating de Wi-Fi por papel: o LEADER mantem a associacao STA (uplink
-    // MQTT); o MEMBER a derruba para economizar bateria. connect()/disconnect()
-    // sao idempotentes, entao chamadas repetidas (resync, re-eleicao) sao
-    // seguras. O SoftAP/ESP-NOW seguem ativos em ambos os papeis.
-    if (new_role == Role::LEADER) {
-        driver::wifi::connect();
-    } else {
-        driver::wifi::disconnect();
+    // Estado do radio por papel. exit/enter_low_power sao idempotentes, entao
+    // chamadas repetidas (resync, re-eleicao) sao seguras.
+    switch (new_role) {
+    case Role::LEADER:
+        driver::wifi::exit_low_power();
+        break;
+    case Role::MEMBER:
+        driver::wifi::enter_low_power();
+        break;
+    case Role::UNDECIDED:
+    default:
+        // Boot: o radio ja fica cheio pela config de init(). NAO mexer no
+        // Wi-Fi aqui: set_role(UNDECIDED) roda em role::init(), ANTES de
+        // wifi::init() (ver application_controller::init), entao chamar a API
+        // do Wi-Fi neste ponto travaria o boot.
+        break;
     }
 }
 

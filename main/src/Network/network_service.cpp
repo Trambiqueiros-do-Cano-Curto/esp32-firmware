@@ -7,6 +7,8 @@
 #include "esp_log.h"
 #include "esp_mac.h"
 #include "esp_now.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 
 #include <array>
 #include <cstdint>
@@ -232,6 +234,20 @@ void send_reset_energy_broadcast(ResetScenario scenario, const char *run_id) {
     std::array<uint8_t, sizeof(ResetEnergyPayload)> data{};
     memcpy(data.data(), &payload, sizeof(payload));
     driver::network::esp_now::send_broadcast(RxCommand::RESET_ENERGY, data);
+}
+
+// ~15 envios a 200 ms = ~3 s. Com wake_interval=500 ms cobre ~6 janelas,
+// tornando a recepcao por membros em duty-cycle praticamente certa. O
+// receptor (reset_energy_received) e idempotente para reentregas do mesmo
+// run_id; o no reinicia ao aplicar, entao reenvios extras sao inofensivos.
+static constexpr int RESET_BROADCAST_REPEATS = 15;
+static constexpr uint32_t RESET_BROADCAST_SPACING_MS = 200;
+
+void send_reset_energy_robust(ResetScenario scenario, const char *run_id) {
+    for (int i = 0; i < RESET_BROADCAST_REPEATS; ++i) {
+        send_reset_energy_broadcast(scenario, run_id);
+        vTaskDelay(RESET_BROADCAST_SPACING_MS / portTICK_PERIOD_MS);
+    }
 }
 
 ResetScenario get_reset_scenario() { return reset_scenario; }
