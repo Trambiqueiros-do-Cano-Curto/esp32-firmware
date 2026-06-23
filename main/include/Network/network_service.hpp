@@ -75,6 +75,11 @@ void send_rotate(controller::network::MacAddr next_leader);
 // persisted energy (battery + budget) and restarts. Best-effort over ESP-NOW:
 // the caller (button_service) repeats the broadcast a few times to cover loss.
 void send_reset_energy_broadcast(ResetScenario scenario, const char *run_id);
+
+// Retransmite o RESET por ~3 s (cobrindo varios wake_interval) para alcancar
+// membros com o radio em duty-cycle. Bloqueante. Use nos gestos de reset.
+void send_reset_energy_robust(ResetScenario scenario, const char *run_id);
+
 ResetScenario get_reset_scenario();
 const char *get_reset_run_id();
 
