@@ -4,16 +4,17 @@
 
 namespace driver::wifi {
 
-// Sobe o stack em APSTA: um SoftAP placeholder no canal fixo mantem o radio
-// acordado (ESP-NOW) e o STA fica DESASSOCIADO ate connect() ser chamado.
+// Sobe o stack em WIFI_MODE_STA (sem SoftAP), STA desassociado e pinado no
+// canal fixo do cluster para o ESP-NOW. Boot fica com radio cheio (PS_NONE).
 void init();
 
-// Associa o STA ao AP configurado (chamado ao virar LEADER). Idempotente.
-void connect();
+// LEADER/boot-LEADER: radio continuo (PS_NONE) e associa o STA ao AP para o
+// uplink MQTT. Idempotente.
+void exit_low_power();
 
-// Desassocia o STA para economizar bateria (chamado ao virar MEMBER). O
-// SoftAP e o ESP-NOW continuam ativos. Idempotente; nao dispara reconexao
-// automatica.
-void disconnect();
+// MEMBER: derruba a associacao STA e coloca o radio em duty-cycle
+// (PS_MIN_MODEM + ESP-NOW wake-window). Com CONFIG_MEMBER_POWER_SAVE=n,
+// apenas desassocia e mantem o radio cheio (ensaio de controle). Idempotente.
+void enter_low_power();
 
 }
